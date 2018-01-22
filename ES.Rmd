@@ -1,0 +1,98 @@
+---
+output: html_document
+---
+
+## How-to
+***
+
+#### Exponential Smoothing
+
+For an explanation of the ideas of exponential smoothing, I can't recommend more the second chapter (free) of [Forecasting with Exponential Smoothing: A State Space Approach](http://www.exponentialsmoothing.net/toc) by Rob J. Hyndman, Anne B. Koehler, J. Keith Ord, and Ralph D. Snyder
+
+
+#### Example
+
+We will now illustrate a particular case of estimating an exponential smoothing problem, taken from the previously mentioned book.
+
+Our data will be the inbuilt dataset in *R*, *USAccDeaths*, a dataset consisting of Accidental Deaths in the US 1973-1978. We will fit an "optimal" exponential smoothing model by using an automatic inbuilt algorithm in the *ets* *R* package and forecast 12 months of data.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(forecast)
+library(ggplot2)
+library(gridExtra)
+library(zoo)
+
+data("USAccDeaths")
+Dates <- as.Date(time(USAccDeaths))
+DeathsDF <- data.frame(Dates, USAccDeaths)
+fit <- ets(USAccDeaths)
+
+fcast <- forecast(fit, 12)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+
+# I credit the GitHub user fernandotenorio for this function.
+new.plot <-function(forec.obj, data.color = 'black', fit.color = 'blue', forec.color = 'red',
+                           lower.fill = 'orange', upper.fill = 'darkorange', format.date = F)
+{
+    serie.orig = forec.obj$x
+    serie.fit = forec.obj$fitted
+    pi.strings = paste(forec.obj$level, '%', sep = '')
+    
+     if(format.date)
+        dates = as.Date(time(serie.orig))
+    else
+        dates = time(serie.orig)
+    
+    serie.df = data.frame(date = dates, serie.orig = serie.orig, serie.fit = serie.fit)
+    
+    forec.M = cbind(forec.obj$mean, forec.obj$lower[, 1:2], forec.obj$upper[, 1:2])
+    forec.df = as.data.frame(forec.M)
+    colnames(forec.df) = c('forec.val', 'l0', 'l1', 'u0', 'u1')
+    
+    if(format.date)
+        forec.df$date = as.Date(time(forec.obj$mean))
+    else
+        forec.df$date = time(forec.obj$mean)
+    
+    p = ggplot() + theme_minimal()  + xlab("") + ylab("USAccDeaths") +
+        geom_line(aes(date, serie.orig, colour = 'data'), data = serie.df) + 
+        geom_line(aes(date, serie.fit, colour = 'fit'), data = serie.df) + 
+        scale_y_continuous() +
+        geom_ribbon(aes(x = date, ymin = l0, ymax = u0, fill = 'lower'), data = forec.df, alpha = I(0.4)) + 
+        geom_ribbon(aes(x = date, ymin = l1, ymax = u1, fill = 'upper'), data = forec.df, alpha = I(0.3)) + 
+        geom_line(aes(date, forec.val, colour = 'forecast'), data = forec.df) + 
+        scale_color_manual('Series', values=c('data' = data.color, 'fit' = fit.color, 'forecast' = forec.color), labels = c("Original Data", "Fitted Values", "Forecast") ) + 
+        scale_fill_manual('Confidence Interval', values=c('lower' = lower.fill, 'upper' = upper.fill), labels = pi.strings)
+    
+    if (format.date)
+        p = p + scale_x_date()
+    
+    p
+}
+new.plot(fcast)
+
+summary(fcast)
+```
+
+In order to obtain this plot set:
+
+- Error Type: Aditive
+- Trend Type: None
+- Season Type: Aditive
+
+Or, if you're feeling a little bit lazy, just click the "Fit and Forecast" button as the default values and data are set to deliver our example plot.
+
+***
+#### Prohibited combinations
+
+Let the first element stand for the "Error Type" specification, the second element for the "Trend type" specification and the third element for the "Season Type" specification. Let *N* denote "None", *A* "Aditive", and *M* "Multiplicative". The following are non allowed ETS model specifications:
+
+- ANM
+- AMN
+- AMA
+- AAM
+- AMM
+- MMA

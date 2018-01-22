@@ -1,0 +1,42 @@
+---
+output: html_document
+---
+## About
+***
+#### What is Time Series Econometrics on the go?
+
+A web app for easy and on the go univariate time series econometrics. No installation required, just upload your data and start forecasting after a few clicks! The models available are: 
+
+- Exponential Smoothing (ETS) model
+- Autoregressive iterated moving average (ARIMA) model
+- General AutoRegressive Conditional Heteroskedasticity (GARCH) Model [TO COME]
+
+#### Source Code
+
+You can find all of the code for the app in [this GitHub repository](https://www.google.es).
+
+#### Learning
+
+For those interested in learning more about the underlying models used in this app I recommend you take a look at some of the following resources:
+
+ - [Introductory Time Series with R](http://www.maths.adelaide.edu.au/andrew.metcalfe/)  by Paul S.P. Cowpertwait and  Andrew V. Metcalfe
+ - Time Series Analysis by James D. Hamilton
+ 
+#### Author
+
+ <center>
+<img src="./lluc.jpg" class="img-circle" align="center" height="150" width="150" ><style> .img-circle{margin: 1cm}</style>
+*Lluc Puig Codina*
+</center>
+MSc in Economics and Finance from the *Barcelona Graduate School of Economics* and Bachelor of Economics, with a minor in Advanced Quantitative Methods, from *Pompeu Fabra University*. Interested in many aspects of macroeconomic theory, finance and applied econometrics.
+
+- Personal webpage: [llucpuigcodina.github.io](https://llucpuigcodina.github.io/)
+- E-mail: llucpuigcodina[at]gmail.com
+
+#### Acknowledgements
+
+I would like to thank many people for their direct and indirect contribution to this project. First of all I would like to thank [Christian Brownless](http://84.89.132.1/~cbrownlees/), who thaught me forecasting (time series econometrics). I would also like to thank all those who contributed to the creation and development of the *R* language, *Rstudio*, *Shiny* and many of the packages used. Finally, I thank the [John Hopkins University Data Science Lab](http://jhudatascience.org/) for their didactic efforts and their [papr](https://jhubiostatistics.shinyapps.io/papr/) app, from which I shamelessly took the template. 
+
+#### Terms & Disclaimer
+
+This app is for entertainment and didactic purposes only. No forecasts made with this app should be taken with any kind of value nor as advice. 

@@ -1,0 +1,128 @@
+---
+output: html_document
+---
+
+## How-to
+***
+
+#### Auto-Regressive (AR) Model of order *p*
+
+Before starting with defining an ARIMA model, we will start with some of the simple model's it nests, untill we finally build up to the ARIMA. The AR model postulates that the value of the outcome variable, $X_t$, is formed by a linear combination of past values and a stochastic term:
+
+$$
+X_t = \mu + \sum_{i = 1}^p \varphi_i X_{t-i} + \epsilon_t
+$$
+where $\varphi_1,..., \varphi_p$ are the parameters of the model, $\mu$ is a constant and $\epsilon_t$ is white noise (~ $D(0,\sigma)$ i.i.d).
+
+In order to estimate an AR model of order *p* we need to set all parameters of the ARIMA model to 0 except the parameter *p*, set at the desired value.
+
+#### Moving-average (MA) Model of order *q*
+
+The MA model postulates that the value of the outcome variable $X_t$, is a linear combination of current and past values of a stochastic term:
+
+$$
+X_t = \mu + \epsilon_t + \sum_{i=1}^q \theta_i \epsilon_{t-i}
+$$
+
+where $\theta_1,..., \theta_q$ are the parameters of the model, $\mu$ is a constant and $\epsilon_t,..., \epsilon_{t-q}$ are white nosie error tems. 
+
+In order to estimate an MA model of order *q* we need to set all parameters of the ARIMA model to 0 except the parameter *q*, set at the desired value.
+
+#### Autoregressive-moving-average (ARMA) model
+
+The ARMA model postulates that the value of the outcome variable $X_t$, is a linear combination of an AR and MA model:
+
+$$
+X_t = \mu + \epsilon_t + \sum_{i = 1}^p \varphi_i X_{t-i} + \sum_{i=1}^q \theta_i \epsilon_{t-i}
+$$
+In order to estimate an ARMA model of order *p*, *q* we need to set all parameters of the ARIMA model to 0 except parameters *p* and *q*, set at the desired value.
+
+#### Autoregressive integrated moving average (ARIMA) model
+
+The ARIMA postulates that the value of the outcome variable $X_t$, is a linear combination of an AR and MA model, along with differencing, *d* times, in order to make the original series stationary:
+
+$$
+X_t = \mu -(\Delta^d X_t - X_t) + \sum_{i = 1}^p \varphi_i \Delta^d X_{t-i} + \sum_{i=1}^q \theta_i \epsilon_{t-i} + \epsilon_t
+$$
+
+The ARIMA model can also be adjusted for seasonality, yielding the [SARIMA](./sarima.png) model.
+
+***
+
+#### Example
+
+We will now illustrate a particular case of estimating an ARMA model. 
+
+Our data will be the inbuilt dataset in *R*, *AirPassangers*, a dataset consisting of total monthly international airline passangers from 1949 to 1960. We will fit an "optimal" ARIMA model by using the Box-Jenkins method (embeded in the "Box-Jenkins method" button) and forecast 12 months of data.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(forecast)
+library(ggplot2)
+library(gridExtra)
+library(zoo)
+
+data("AirPassengers")
+Dates <- as.Date(time(AirPassengers))
+AirDF <- data.frame(Dates, AirPassengers)
+fit <- auto.arima(AirPassengers, seasonal = TRUE)
+
+fcast <- forecast(fit, 12)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+
+# I credit the GitHub user fernandotenorio for this function.
+new.plot <-function(forec.obj, data.color = 'black', fit.color = 'blue', forec.color = 'red',
+                           lower.fill = 'orange', upper.fill = 'darkorange', format.date = F)
+{
+    serie.orig = forec.obj$x
+    serie.fit = forec.obj$fitted
+    pi.strings = paste(forec.obj$level, '%', sep = '')
+    
+     if(format.date)
+        dates = as.Date(time(serie.orig))
+    else
+        dates = time(serie.orig)
+    
+    serie.df = data.frame(date = dates, serie.orig = serie.orig, serie.fit = serie.fit)
+    
+    forec.M = cbind(forec.obj$mean, forec.obj$lower[, 1:2], forec.obj$upper[, 1:2])
+    forec.df = as.data.frame(forec.M)
+    colnames(forec.df) = c('forec.val', 'l0', 'l1', 'u0', 'u1')
+    
+    if(format.date)
+        forec.df$date = as.Date(time(forec.obj$mean))
+    else
+        forec.df$date = time(forec.obj$mean)
+    
+    p = ggplot() + theme_minimal()  + xlab("") + ylab("AirPassengers") +
+        geom_line(aes(date, serie.orig, colour = 'data'), data = serie.df) + 
+        geom_line(aes(date, serie.fit, colour = 'fit'), data = serie.df) + 
+        scale_y_continuous() +
+        geom_ribbon(aes(x = date, ymin = l0, ymax = u0, fill = 'lower'), data = forec.df, alpha = I(0.4)) + 
+        geom_ribbon(aes(x = date, ymin = l1, ymax = u1, fill = 'upper'), data = forec.df, alpha = I(0.3)) + 
+        geom_line(aes(date, forec.val, colour = 'forecast'), data = forec.df) + 
+        scale_color_manual('Series', values=c('data' = data.color, 'fit' = fit.color, 'forecast' = forec.color), labels = c("Original Data", "Fitted Values", "Forecast") ) + 
+        scale_fill_manual('Confidence Interval', values=c('lower' = lower.fill, 'upper' = upper.fill), labels = pi.strings)
+    
+    if (format.date)
+        p = p + scale_x_date()
+    
+    p
+}
+new.plot(fcast)
+
+summary(fcast)
+```
+
+In order to obtain this plot set:
+
+- *p* (order of the non seasonal AR components) = 2
+- *q* (order of the non seasonal  MA components) = 1
+- *d* (non seasonal differencing) = 1
+- *P* (order of the seasonal AR components) = 0
+- *Q* (order of the seasonal MA components) = 1
+- *D* (seasonal differencing) = 0
+
+Or, if you're feeling a little bit lazy, just click the "Fit and Forecast" button as the default values and data are set to deliver our example plot.
