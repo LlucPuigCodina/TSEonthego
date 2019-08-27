@@ -6,6 +6,5 @@ A Shiny app for easy and on the go univariate time series econometrics. No insta
 
 - Exponential Smoothing (ETS) model
 - Autoregressive iterated moving average (ARIMA) model
-- General AutoRegressive Conditional Heteroskedasticity (GARCH) Model [TO COME]
 
 Check it out at: https://llucpuigcodina.shinyapps.io/TSEonthego/
